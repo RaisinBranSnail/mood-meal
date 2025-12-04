@@ -18,9 +18,10 @@ export const LoginScreenStyles = StyleSheet.create({
     fontFamily: 'sans-serif-medium',
   },
   image: {
-    width: 120,
-    height: 120,
-    marginBottom: 40,
+    width: 200,
+    height: 200,
+    marginBottom: 32,
+    resizeMode: 'contain',
   },
   button: {
     flexDirection: 'row',

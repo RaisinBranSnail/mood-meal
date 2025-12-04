@@ -108,22 +108,27 @@ export default function SettingsScreen() {
     return true;
   };
 
-  const handleLogout = () => {
+  const confirmLogout = () => {
     Alert.alert(
       'Logout',
       'Are you sure you want to logout?',
       [
         { text: 'Cancel', style: 'cancel' },
-        {
-          text: 'Logout',
-          style: 'destructive',
-          onPress: async () => {
-            await supabase.auth.signOut();
-            router.replace('/');
-          },
-        },
+        { text: 'Logout', style: 'destructive', onPress: handleLogout },
       ]
     );
+  };
+
+  const handleLogout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
+      router.replace('/');
+    } catch (err: any) {
+      Alert.alert('Logout failed', err.message ?? 'Please try again.');
+    }
   };
 
   const handleChangePassword = async () => {
@@ -329,7 +334,7 @@ export default function SettingsScreen() {
       </View>
 
       {/* Logout Button */}
-      <TouchableOpacity style={styles.logoutButton} onPress={handleLogout}>
+            <TouchableOpacity style={styles.logoutButton} onPress={confirmLogout}>
         <Ionicons name="log-out-outline" size={20} color="#fff" />
         <Text style={styles.logoutText}>Logout</Text>
       </TouchableOpacity>
