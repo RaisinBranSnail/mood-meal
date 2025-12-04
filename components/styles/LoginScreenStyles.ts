@@ -6,9 +6,13 @@ export const LoginScreenStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#3B2D4D',
+  },
+  scrollContent: {
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
+    paddingVertical: 40,
   },
   logo: {
     fontSize: 36,
@@ -22,6 +26,7 @@ export const LoginScreenStyles = StyleSheet.create({
     height: 200,
     marginBottom: 32,
     resizeMode: 'contain',
+    overflow: 'visible',
   },
   button: {
     flexDirection: 'row',
