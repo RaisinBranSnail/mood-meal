@@ -125,8 +125,7 @@ export default function SettingsScreen() {
       if (error) {
         throw error;
       }
-      // Clear navigation stack and return to login screen
-      router.dismissAll();
+      // Navigate back to the login screen after logout
       router.replace('/(tabs)');
     } catch (err: any) {
       Alert.alert('Logout failed', err.message ?? 'Please try again.');

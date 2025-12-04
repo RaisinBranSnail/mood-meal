@@ -53,6 +53,32 @@ export default function MainScreen() {
     fetchActivity();
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const ensureSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (isMounted && !session) {
+        setActiveTab('home');
+        router.replace('/(tabs)');
+      }
+    };
+
+    ensureSession();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (!session) {
+        setActiveTab('home');
+        router.replace('/(tabs)');
+      }
+    });
+
+    return () => {
+      isMounted = false;
+      authListener?.subscription?.unsubscribe();
+    };
+  }, [router]);
+
   return (
     <View style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContent}>
