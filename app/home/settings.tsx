@@ -109,6 +109,11 @@ export default function SettingsScreen() {
   };
 
   const confirmLogout = () => {
+    if (Platform.OS === 'web') {
+      handleLogout();
+      return;
+    }
+
     Alert.alert(
       'Logout',
       'Are you sure you want to logout?',
