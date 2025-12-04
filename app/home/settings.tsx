@@ -125,7 +125,8 @@ export default function SettingsScreen() {
       if (error) {
         throw error;
       }
-      router.replace('/');
+      // Navigate to root/login screen after successful logout
+      router.replace('/(tabs)');
     } catch (err: any) {
       Alert.alert('Logout failed', err.message ?? 'Please try again.');
     }
