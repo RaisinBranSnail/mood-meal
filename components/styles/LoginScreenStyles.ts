@@ -13,6 +13,7 @@ export const LoginScreenStyles = StyleSheet.create({
     justifyContent: 'center',
     paddingHorizontal: 24,
     paddingVertical: 40,
+    minHeight: '100%',
   },
   logo: {
     fontSize: 36,
@@ -21,12 +22,18 @@ export const LoginScreenStyles = StyleSheet.create({
     marginBottom: 20,
     fontFamily: 'sans-serif-medium',
   },
-  image: {
-    width: 200,
-    height: 200,
+  imageContainer: {
+    width: 220,
+    height: 220,
+    alignItems: 'center',
+    justifyContent: 'center',
     marginBottom: 32,
-    resizeMode: 'contain',
     overflow: 'visible',
+  },
+  image: {
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
   },
   button: {
     flexDirection: 'row',

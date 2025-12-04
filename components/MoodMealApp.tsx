@@ -20,10 +20,12 @@ const MoodMealApp = () => {
       >
         <Text style={styles.logo}>Moo'dMeal</Text>
 
-        <Image
-          source={require('@/assets/moodmeal-bowl.png')}
-          style={styles.image}
-        />
+        <View style={styles.imageContainer}>
+          <Image
+            source={require('@/assets/moodmeal-bowl.png')}
+            style={styles.image}
+          />
+        </View>
 
         <TouchableOpacity style={styles.button} onPress={() => setScreen('email')}>
           <AntDesign name="mail" size={20} color="#3B2D4D" />
