@@ -3,7 +3,7 @@ import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import { Image, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
-import { supabase } from '@/supabase';
+import { supabase } from '@/lib/supabase';
 import { EmailLoginStyles as styles } from './styles/EmailLoginStyles';
 
 const EmailLoginScreen = () => {

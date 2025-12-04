@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, Image } from 'react-native';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
-import { supabase } from '@/supabase';
+import { supabase } from '@/lib/supabase';
 import { EmailLoginStyles as styles } from './styles/EmailLoginStyles';
 
 import CongratsScreen from './CongratsScreen';
