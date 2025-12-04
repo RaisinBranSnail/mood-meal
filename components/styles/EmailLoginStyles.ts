@@ -4,9 +4,14 @@ export const EmailLoginStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#3B2D4D',
+  },
+  scrollContent: {
+    flexGrow: 1,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 24,
+    paddingVertical: 40,
+    paddingBottom: 60,
   },
   logo: {
     fontSize: 36,
@@ -15,10 +20,20 @@ export const EmailLoginStyles = StyleSheet.create({
     marginBottom: 20,
     fontFamily: 'sans-serif-medium',
   },
+  imageContainer: {
+    width: 180,
+    height: 180,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 32,
+    overflow: 'visible',
+    maxWidth: '100%',
+    maxHeight: 220,
+  },
   image: {
-    width: 120,
-    height: 120,
-    marginBottom: 40,
+    width: '100%',
+    height: '100%',
+    resizeMode: 'contain',
   },
   inputContainer: {
     flexDirection: 'row',

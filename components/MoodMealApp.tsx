@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, Image, TouchableOpacity, ScrollView } from 'react-native';
+import { View, Text, Image, TouchableOpacity, ScrollView, useWindowDimensions } from 'react-native';
 import { AntDesign, FontAwesome } from '@expo/vector-icons';
 import { supabase } from '@/lib/supabase';
 import { LoginScreenStyles as styles } from './styles/LoginScreenStyles';
@@ -8,6 +8,8 @@ import SignUpScreen from './SignUpScreen';
 
 const MoodMealApp = () => {
   const [screen, setScreen] = useState<'login' | 'email' | 'signup'>('login');
+  const { width } = useWindowDimensions();
+  const imageSize = Math.min(Math.max(width * 0.6, 180), 260);
 
   if (screen === 'email') return <EmailLoginScreen />;
   if (screen === 'signup') return <SignUpScreen />;
@@ -20,7 +22,7 @@ const MoodMealApp = () => {
       >
         <Text style={styles.logo}>Moo'dMeal</Text>
 
-        <View style={styles.imageContainer}>
+        <View style={[styles.imageContainer, { width: imageSize, height: imageSize }]}>
           <Image
             source={require('@/assets/moodmeal-bowl.png')}
             style={styles.image}
