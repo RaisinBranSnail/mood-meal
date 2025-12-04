@@ -168,3 +168,4 @@ When deploying to Vercel:
 - ✅ Google OAuth credentials are safe in Supabase (they're server-side)
 - ✅ Always use HTTPS in production
 
+

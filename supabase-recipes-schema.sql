@@ -34,3 +34,4 @@ CREATE POLICY "Users can delete own liked recipes"
 -- Add helpful comment
 COMMENT ON TABLE liked_recipes IS 'Stores user liked/favorited recipes';
 
+

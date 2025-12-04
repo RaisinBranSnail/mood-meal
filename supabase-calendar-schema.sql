@@ -53,3 +53,4 @@ CREATE TRIGGER update_daily_logs_updated_at
 -- Add helpful comment
 COMMENT ON TABLE daily_logs IS 'Stores daily meal logs, nutrition data, and water intake for calendar view';
 
+

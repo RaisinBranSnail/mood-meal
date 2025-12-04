@@ -100,3 +100,4 @@ Then open http://localhost:8081 in your browser to see the mobile viewport.
 - Mobile viewport is only applied on web platform (not native)
 - The app will look like a mobile app even on desktop browsers
 
+

@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   card: {
-    backgroundColor: '#DDBFB9',
+    backgroundColor: '#E5D4D2',
     padding: 20,
     borderRadius: 12,
     marginBottom: 24,
@@ -216,7 +216,7 @@ const styles = StyleSheet.create({
     right: 20,
   },
   summaryCard: {
-    backgroundColor: '#D7C9A6',
+    backgroundColor: '#EBDDD4',
     padding: 20,
     borderRadius: 12,
     marginBottom: 40,
@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   },
   finishButton: {
     flexDirection: 'row',
-    backgroundColor: '#C6AFA2',
+    backgroundColor: '#43274F',
     borderRadius: 12,
     paddingVertical: 14,
     paddingHorizontal: 28,
