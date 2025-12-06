@@ -1,9 +1,17 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet, Platform } from 'react-native';
 
 export const EmailLoginStyles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: '#3B2D4D',
+  },
+  backButton: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 50 : 40,
+    left: 20,
+    zIndex: 10,
+    padding: 8,
+    borderRadius: 20,
   },
   scrollContent: {
     flexGrow: 1,

@@ -11,7 +11,7 @@ const MoodMealApp = () => {
   const { width } = useWindowDimensions();
   const imageSize = Math.min(Math.max(width * 0.6, 180), 260);
 
-  if (screen === 'email') return <EmailLoginScreen />;
+  if (screen === 'email') return <EmailLoginScreen onBack={() => setScreen('login')} />;
   if (screen === 'signup') return <SignUpScreen />;
 
   return (

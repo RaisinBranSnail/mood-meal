@@ -1,4 +1,4 @@
-import { AntDesign, FontAwesome } from '@expo/vector-icons';
+import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React, { useState } from 'react';
 import {
@@ -16,7 +16,11 @@ import {
 import { supabase } from '@/lib/supabase';
 import { EmailLoginStyles as styles } from './styles/EmailLoginStyles';
 
-const EmailLoginScreen = () => {
+interface EmailLoginScreenProps {
+  onBack?: () => void;
+}
+
+const EmailLoginScreen = ({ onBack }: EmailLoginScreenProps) => {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -36,12 +40,25 @@ const EmailLoginScreen = () => {
     }
   };
 
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else if (router.canGoBack()) {
+      router.back();
+    } else {
+      router.replace('/(tabs)');
+    }
+  };
+
   return (
     <View style={styles.container}>
       <KeyboardAvoidingView
         style={{ flex: 1, width: '100%' }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
+        <TouchableOpacity style={styles.backButton} onPress={handleBack}>
+          <Ionicons name="arrow-back" size={24} color="#FDE7CE" />
+        </TouchableOpacity>
         <ScrollView
           contentContainerStyle={styles.scrollContent}
           keyboardShouldPersistTaps="handled"
