@@ -1,9 +1,9 @@
 // This script injects mobile viewport styles before React loads
 // It's executed in the HTML head to prevent flash
 
-if (typeof document !== 'undefined' && !document.getElementById('moodmeal-mobile-styles')) {
+if (typeof document !== 'undefined' && !document.getElementById('dietello-mobile-styles')) {
   const style = document.createElement('style');
-  style.id = 'moodmeal-mobile-styles';
+  style.id = 'dietello-mobile-styles';
   style.textContent = `
     * { 
       box-sizing: border-box; 
@@ -30,7 +30,7 @@ if (typeof document !== 'undefined' && !document.getElementById('moodmeal-mobile
       background-color: #FFF4E9;
     }
     /* iPhone 11 mobile wrapper styles - 414x896 */
-    .moodmeal-mobile-container {
+    .dietello-mobile-container {
       width: 100% !important;
       height: 100vh !important;
       display: flex !important;
@@ -39,7 +39,7 @@ if (typeof document !== 'undefined' && !document.getElementById('moodmeal-mobile
       background-color: #FFF4E9 !important;
       overflow: hidden !important;
     }
-    .moodmeal-mobile-wrapper {
+    .dietello-mobile-wrapper {
       width: 414px !important;
       height: 896px !important;
       max-width: 100% !important;
@@ -51,14 +51,14 @@ if (typeof document !== 'undefined' && !document.getElementById('moodmeal-mobile
       border-radius: 0 !important;
     }
     @media (max-width: 414px) {
-      .moodmeal-mobile-wrapper {
+      .dietello-mobile-wrapper {
         width: 100% !important;
         height: 100vh !important;
         box-shadow: none !important;
       }
     }
     @media (max-height: 896px) {
-      .moodmeal-mobile-wrapper {
+      .dietello-mobile-wrapper {
         height: 100vh !important;
       }
     }
@@ -80,5 +80,8 @@ if (typeof document !== 'undefined' && !document.getElementById('moodmeal-mobile
     document.head.appendChild(style);
   }
 }
+
+
+
 
 

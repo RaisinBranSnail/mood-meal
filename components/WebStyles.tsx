@@ -8,9 +8,9 @@ import { Platform } from 'react-native';
 export default function WebStyles() {
   if (Platform.OS === 'web' && typeof document !== 'undefined') {
     // Inject styles synchronously before React renders
-    if (!document.getElementById('moodmeal-mobile-styles')) {
+    if (!document.getElementById('dietello-mobile-styles')) {
       const style = document.createElement('style');
-      style.id = 'moodmeal-mobile-styles';
+      style.id = 'dietello-mobile-styles';
       style.textContent = `
         * { 
           box-sizing: border-box; 
@@ -36,7 +36,7 @@ export default function WebStyles() {
           justify-content: center;
           background-color: #FFF4E9;
         }
-        #moodmeal-container {
+        #dietello-container {
           width: 100%;
           height: 100vh;
           display: flex;
@@ -45,7 +45,7 @@ export default function WebStyles() {
           background-color: #FFF4E9;
           overflow: hidden;
         }
-        #moodmeal-wrapper {
+        #dietello-wrapper {
           width: min(414px, 100%);
           height: min(896px, 100vh);
           background-color: #FFF4E9;

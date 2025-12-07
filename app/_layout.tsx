@@ -15,15 +15,15 @@ import WebStyles from '@/components/WebStyles';
 
 // Inject mobile styles immediately on web before React renders
 if (Platform.OS === 'web' && typeof document !== 'undefined') {
-  if (!document.getElementById('moodmeal-mobile-styles')) {
+  if (!document.getElementById('dietello-mobile-styles')) {
     const style = document.createElement('style');
-    style.id = 'moodmeal-mobile-styles';
+    style.id = 'dietello-mobile-styles';
     style.textContent = `
       * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
       html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; background-color: #FFF4E9; }
       #root { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background-color: #FFF4E9; }
-      #moodmeal-container { width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #FFF4E9; overflow: hidden; }
-      #moodmeal-wrapper { width: min(414px, 100%); height: min(896px, 100vh); background-color: #FFF4E9; box-shadow: 0 0 30px rgba(0, 0, 0, 0.15); overflow: auto; position: relative; }
+      #dietello-container { width: 100%; height: 100vh; display: flex; align-items: center; justify-content: center; background-color: #FFF4E9; overflow: hidden; }
+      #dietello-wrapper { width: min(414px, 100%); height: min(896px, 100vh); background-color: #FFF4E9; box-shadow: 0 0 30px rgba(0, 0, 0, 0.15); overflow: auto; position: relative; }
       * { touch-action: manipulation; }
     `;
     if (document.head.firstChild) {

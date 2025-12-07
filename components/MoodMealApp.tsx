@@ -6,7 +6,7 @@ import { LoginScreenStyles as styles } from './styles/LoginScreenStyles';
 import EmailLoginScreen from './EmailLoginScreen';
 import SignUpScreen from './SignUpScreen';
 
-const MoodMealApp = () => {
+const DietelloApp = () => {
   const [screen, setScreen] = useState<'login' | 'email' | 'signup'>('login');
   const { width } = useWindowDimensions();
   const imageSize = Math.min(Math.max(width * 0.6, 180), 260);
@@ -20,7 +20,7 @@ const MoodMealApp = () => {
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.logo}>Moo'dMeal</Text>
+        <Text style={styles.logo}>Dietello</Text>
 
         <View style={[styles.imageContainer, { width: imageSize, height: imageSize }]}>
           <Image
@@ -50,4 +50,4 @@ const MoodMealApp = () => {
   );
 };
 
-export default MoodMealApp;
+export default DietelloApp;

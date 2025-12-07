@@ -55,7 +55,7 @@ const CongratsScreen = () => {
 
       <Text style={styles.title}>Congrats!</Text>
       <Text style={styles.subtitle}>
-        You are a new member of Moo'dMeal!
+        You are a new member of Dietello!
       </Text>
 
       {checking ? (

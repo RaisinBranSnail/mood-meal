@@ -35,3 +35,6 @@ CREATE POLICY "Users can delete own liked recipes"
 COMMENT ON TABLE liked_recipes IS 'Stores user liked/favorited recipes';
 
 
+
+
+

@@ -12,8 +12,8 @@ export default function MobileViewport({ children }: MobileViewportProps) {
   }
 
   return (
-    <View nativeID="moodmeal-container" style={styles.webContainer}>
-      <View nativeID="moodmeal-wrapper" style={styles.mobileWrapper}>
+    <View nativeID="dietello-container" style={styles.webContainer}>
+      <View nativeID="dietello-wrapper" style={styles.mobileWrapper}>
         {children}
       </View>
     </View>

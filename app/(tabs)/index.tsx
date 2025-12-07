@@ -1,6 +1,6 @@
 import React from 'react';
-import MoodMealApp from '@/components/MoodMealApp';
+import DietelloApp from '@/components/MoodMealApp';
 
 export default function HomeScreen() {
-  return <MoodMealApp />;
+  return <DietelloApp />;
 }
