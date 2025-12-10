@@ -7,6 +7,8 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
+  ActivityIndicator,
+  useWindowDimensions,
   View,
 } from 'react-native';
 
@@ -43,6 +45,12 @@ export default function CalendarScreen() {
   const [selectedDayData, setSelectedDayData] = useState<DailyLog | null>(null);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [formWater, setFormWater] = useState(0);
+  const [formMeals, setFormMeals] = useState(0);
+  const [saving, setSaving] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
+  const { height, width } = useWindowDimensions();
+  const modalMaxWidth = Math.min(400, width - 24); // keep within phone frame on web
 
   useEffect(() => {
     fetchDailyLogs();
@@ -110,13 +118,16 @@ export default function CalendarScreen() {
       const date = new Date(year, month, day);
       const dateString = date.toISOString().split('T')[0];
       const log = dailyLogs.get(dateString);
+      const mealCount = log?.meals?.length || 0;
+      const waterIntake = Number(log?.water_intake ?? 0);
+      const hasData = !!log && (mealCount > 0 || waterIntake > 0);
 
       days.push({
         date,
-        hasData: !!log,
+        hasData,
         calories: log?.total_calories,
-        water: log?.water_intake,
-        mealCount: log?.meals?.length || 0,
+        water: waterIntake,
+        mealCount,
       });
     }
 
@@ -124,15 +135,14 @@ export default function CalendarScreen() {
   };
 
   const handleDayPress = (dayData: DayData) => {
-    if (!dayData.hasData) return;
-
     const dateString = dayData.date.toISOString().split('T')[0];
     const log = dailyLogs.get(dateString);
-    if (log) {
-      setSelectedDayData(log);
-      setSelectedDate(dayData.date);
-      setModalVisible(true);
-    }
+    setSelectedDayData(log || null);
+    setSelectedDate(dayData.date);
+    setFormWater(log?.water_intake || 0);
+    setFormMeals(log?.meals?.length || 0);
+    setErrorMsg('');
+    setModalVisible(true);
   };
 
   const navigateMonth = (direction: 'prev' | 'next') => {
@@ -165,6 +175,90 @@ export default function CalendarScreen() {
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   const days = getDaysInMonth();
+
+  const handleSaveLog = async () => {
+    if (!selectedDate) return;
+    setSaving(true);
+    setErrorMsg('');
+
+    try {
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        setErrorMsg('Please log in to save your day.');
+        return;
+      }
+
+      const mealCount = Math.max(0, Math.floor(formMeals));
+      const waterIntake = Math.max(0, Math.floor(formWater));
+      const dateString = selectedDate.toISOString().split('T')[0];
+
+      const existingMeals = selectedDayData?.meals
+        ? [...selectedDayData.meals]
+        : [];
+
+      if (mealCount > existingMeals.length) {
+        const toAdd = mealCount - existingMeals.length;
+        for (let i = 0; i < toAdd; i++) {
+          existingMeals.push({
+            name: `Meal ${existingMeals.length + 1}`,
+            calories: 0,
+            carbs: 0,
+            protein: 0,
+            fat: 0,
+            meal_type: 'snack',
+          });
+        }
+      } else if (mealCount < existingMeals.length) {
+        existingMeals.length = mealCount;
+      }
+
+      const totals = existingMeals.reduce(
+        (acc, meal) => {
+          acc.calories += Number(meal.calories || 0);
+          acc.carbs += Number(meal.carbs || 0);
+          acc.protein += Number(meal.protein || 0);
+          acc.fat += Number(meal.fat || 0);
+          return acc;
+        },
+        { calories: 0, carbs: 0, protein: 0, fat: 0 }
+      );
+
+      const { data, error } = await supabase
+        .from('daily_logs')
+        .upsert(
+          {
+            user_id: user.id,
+            date: dateString,
+            meals: existingMeals,
+            total_calories: totals.calories,
+            total_carbs: totals.carbs,
+            total_protein: totals.protein,
+            total_fat: totals.fat,
+            water_intake: waterIntake,
+          },
+          { onConflict: 'user_id,date' }
+        )
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const newLog = data as DailyLog;
+      const newMap = new Map(dailyLogs);
+      newMap.set(dateString, newLog);
+      setDailyLogs(newMap);
+      setSelectedDayData(newLog);
+      setModalVisible(false);
+    } catch (err) {
+      console.error('Error saving daily log:', err);
+      setErrorMsg('Could not save. Please try again.');
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const getMealTypeIcon = (type: string) => {
     switch (type) {
@@ -223,6 +317,8 @@ export default function CalendarScreen() {
               return <View key={index} style={styles.dayCell} />;
             }
 
+            const mealCount = Number(dayData.mealCount || 0);
+            const waterCount = Number(dayData.water || 0);
             const isToday =
               dayData.date.toDateString() === new Date().toDateString();
             const isSelected =
@@ -238,7 +334,6 @@ export default function CalendarScreen() {
                   dayData.hasData && styles.hasDataCell,
                 ]}
                 onPress={() => handleDayPress(dayData)}
-                disabled={!dayData.hasData}
               >
                 <Text
                   style={[
@@ -249,16 +344,16 @@ export default function CalendarScreen() {
                 >
                   {dayData.date.getDate()}
                 </Text>
-                {dayData.hasData && (
+                {mealCount > 0 || waterCount > 0 ? (
                   <View style={styles.dayIndicators}>
-                    {dayData.calories && dayData.calories > 0 && (
+                    {mealCount > 0 && (
                       <View style={styles.indicatorDot} />
                     )}
-                    {dayData.water && dayData.water > 0 && (
+                    {waterCount > 0 && (
                       <View style={[styles.indicatorDot, styles.waterDot]} />
                     )}
                   </View>
-                )}
+                ) : null}
               </TouchableOpacity>
             );
           })}
@@ -284,8 +379,31 @@ export default function CalendarScreen() {
         transparent={true}
         onRequestClose={() => setModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContent}>
+        <View
+          style={[
+            styles.modalOverlay,
+            {
+              width: '100%',
+              maxWidth: modalMaxWidth,
+              alignSelf: 'center',
+              height: '100%',
+              maxHeight: height,
+              paddingTop: 24,
+              paddingBottom: 24,
+            },
+          ]}
+        >
+          <View
+            style={[
+              styles.modalContent,
+              {
+                maxHeight: Math.min(height * 0.85, 720),
+                minHeight: height * 0.55,
+                width: '100%',
+                maxWidth: modalMaxWidth,
+              },
+            ]}
+          >
             <View style={styles.modalHeader}>
               <Text style={styles.modalTitle}>
                 {selectedDate &&
@@ -301,18 +419,80 @@ export default function CalendarScreen() {
               </TouchableOpacity>
             </View>
 
-            <ScrollView style={styles.modalScrollContent}>
+            <ScrollView
+              style={styles.modalScrollContent}
+              contentContainerStyle={styles.modalScrollInner}
+              showsVerticalScrollIndicator={false}
+            >
+              <View style={styles.quickLogCard}>
+                <Text style={styles.sectionTitle}>Log your day</Text>
+                <View style={styles.logRow}>
+                  <View style={styles.logLabelRow}>
+                    <Ionicons name="restaurant" size={20} color="#E76F51" />
+                    <Text style={styles.logLabel}>Meals</Text>
+                  </View>
+                  <View style={styles.counter}>
+                    <TouchableOpacity
+                      onPress={() => setFormMeals((prev) => Math.max(0, prev - 1))}
+                      style={styles.counterBtn}
+                      disabled={saving}
+                    >
+                      <Ionicons name="remove" size={18} color="#43274F" />
+                    </TouchableOpacity>
+                    <Text style={styles.counterValue}>{formMeals}</Text>
+                    <TouchableOpacity
+                      onPress={() => setFormMeals((prev) => prev + 1)}
+                      style={styles.counterBtn}
+                      disabled={saving}
+                    >
+                      <Ionicons name="add" size={18} color="#43274F" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                <View style={styles.logRow}>
+                  <View style={styles.logLabelRow}>
+                    <Ionicons name="water" size={20} color="#4A90E2" />
+                    <Text style={styles.logLabel}>Cups of water</Text>
+                  </View>
+                  <View style={styles.counter}>
+                    <TouchableOpacity
+                      onPress={() => setFormWater((prev) => Math.max(0, prev - 1))}
+                      style={styles.counterBtn}
+                      disabled={saving}
+                    >
+                      <Ionicons name="remove" size={18} color="#43274F" />
+                    </TouchableOpacity>
+                    <Text style={styles.counterValue}>{formWater}</Text>
+                    <TouchableOpacity
+                      onPress={() => setFormWater((prev) => prev + 1)}
+                      style={styles.counterBtn}
+                      disabled={saving}
+                    >
+                      <Ionicons name="add" size={18} color="#43274F" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+
+                {errorMsg ? <Text style={styles.errorText}>{errorMsg}</Text> : null}
+
+                <TouchableOpacity
+                  style={[styles.saveButton, saving && styles.saveButtonDisabled]}
+                  onPress={handleSaveLog}
+                  disabled={saving}
+                >
+                  {saving ? (
+                    <ActivityIndicator color="#FFF" />
+                  ) : (
+                    <Text style={styles.saveButtonText}>Save day</Text>
+                  )}
+                </TouchableOpacity>
+              </View>
+
               {selectedDayData && (
                 <>
                   {/* Summary Cards */}
                   <View style={styles.summaryRow}>
-                    <View style={styles.summaryCard}>
-                      <Ionicons name="flame" size={20} color="#E76F51" />
-                      <Text style={styles.summaryValue}>
-                        {Math.round(selectedDayData.total_calories || 0)}
-                      </Text>
-                      <Text style={styles.summaryLabel}>kcal</Text>
-                    </View>
                     <View style={styles.summaryCard}>
                       <Ionicons name="water" size={20} color="#4A90E2" />
                       <Text style={styles.summaryValue}>
@@ -328,62 +508,6 @@ export default function CalendarScreen() {
                       <Text style={styles.summaryLabel}>meals</Text>
                     </View>
                   </View>
-
-                  {/* Macros */}
-                  <View style={styles.macrosCard}>
-                    <Text style={styles.sectionTitle}>Macros</Text>
-                    <View style={styles.macroRow}>
-                      <Text style={styles.macroLabel}>Carbs</Text>
-                      <Text style={styles.macroValue}>
-                        {Math.round(selectedDayData.total_carbs || 0)}g
-                      </Text>
-                    </View>
-                    <View style={styles.macroRow}>
-                      <Text style={styles.macroLabel}>Protein</Text>
-                      <Text style={styles.macroValue}>
-                        {Math.round(selectedDayData.total_protein || 0)}g
-                      </Text>
-                    </View>
-                    <View style={styles.macroRow}>
-                      <Text style={styles.macroLabel}>Fat</Text>
-                      <Text style={styles.macroValue}>
-                        {Math.round(selectedDayData.total_fat || 0)}g
-                      </Text>
-                    </View>
-                  </View>
-
-                  {/* Meals List */}
-                  {selectedDayData.meals && selectedDayData.meals.length > 0 && (
-                    <View style={styles.mealsCard}>
-                      <Text style={styles.sectionTitle}>Meals</Text>
-                      {selectedDayData.meals.map((meal, index) => (
-                        <View key={index} style={styles.mealItem}>
-                          <View style={styles.mealHeader}>
-                            <Ionicons
-                              name={getMealTypeIcon(meal.meal_type) as any}
-                              size={20}
-                              color="#43274F"
-                            />
-                            <Text style={styles.mealName}>{meal.name}</Text>
-                            <Text style={styles.mealCalories}>
-                              {Math.round(meal.calories)} kcal
-                            </Text>
-                          </View>
-                          <View style={styles.mealMacros}>
-                            <Text style={styles.mealMacroText}>
-                              C: {Math.round(meal.carbs)}g
-                            </Text>
-                            <Text style={styles.mealMacroText}>
-                              P: {Math.round(meal.protein)}g
-                            </Text>
-                            <Text style={styles.mealMacroText}>
-                              F: {Math.round(meal.fat)}g
-                            </Text>
-                          </View>
-                        </View>
-                      ))}
-                    </View>
-                  )}
                 </>
               )}
             </ScrollView>
@@ -553,10 +677,78 @@ const styles = StyleSheet.create({
     color: '#43274F',
     fontWeight: '600',
   },
+  quickLogCard: {
+    backgroundColor: '#EBDDD4',
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 20,
+    // @ts-ignore - web-only style
+    boxShadow: '0 4px 10px rgba(0,0,0,0.08)',
+  },
+  logRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+  },
+  logLabelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  logLabel: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: '#3C2A3E',
+  },
+  counter: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  counterBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: '#F8C9A0',
+    alignItems: 'center',
+    justifyContent: 'center',
+    // @ts-ignore - web-only style
+    boxShadow: '0 2px 6px rgba(0,0,0,0.12)',
+  },
+  counterValue: {
+    minWidth: 24,
+    textAlign: 'center',
+    fontSize: 16,
+    fontWeight: '700',
+    color: '#43274F',
+  },
+  saveButton: {
+    backgroundColor: '#43274F',
+    borderRadius: 12,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  saveButtonDisabled: {
+    opacity: 0.7,
+  },
+  saveButtonText: {
+    color: '#FFF',
+    fontWeight: '700',
+    fontSize: 16,
+  },
+  errorText: {
+    color: '#D64545',
+    marginBottom: 12,
+    fontSize: 13,
+    fontWeight: '600',
+  },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0, 0, 0, 0.5)',
     justifyContent: 'flex-end',
+    alignItems: 'center',
+    paddingHorizontal: 16,
   },
   modalContent: {
     backgroundColor: '#FFF4E9',
@@ -564,6 +756,9 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 24,
     maxHeight: '85%',
     paddingBottom: 40,
+    width: '100%',
+    maxWidth: 420,
+    alignSelf: 'center',
   },
   modalHeader: {
     flexDirection: 'row',
@@ -581,6 +776,9 @@ const styles = StyleSheet.create({
   },
   modalScrollContent: {
     padding: 24,
+  },
+  modalScrollInner: {
+    paddingBottom: 32,
   },
   summaryRow: {
     flexDirection: 'row',
@@ -604,69 +802,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#666',
     marginTop: 4,
-  },
-  macrosCard: {
-    backgroundColor: '#DDBFB9',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#3C2A3E',
-    marginBottom: 12,
-  },
-  macroRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  macroLabel: {
-    fontSize: 16,
-    color: '#3C2A3E',
-  },
-  macroValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#43274F',
-  },
-  mealsCard: {
-    backgroundColor: '#D7C9A6',
-    borderRadius: 12,
-    padding: 16,
-  },
-  mealItem: {
-    marginBottom: 16,
-    paddingBottom: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#C4B89A',
-  },
-  mealHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 8,
-  },
-  mealName: {
-    flex: 1,
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#3C2A3E',
-  },
-  mealCalories: {
-    fontSize: 14,
-    color: '#E76F51',
-    fontWeight: '600',
-  },
-  mealMacros: {
-    flexDirection: 'row',
-    gap: 12,
-    marginLeft: 28,
-  },
-  mealMacroText: {
-    fontSize: 12,
-    color: '#666',
   },
 });
 
